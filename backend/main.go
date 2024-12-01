@@ -1,170 +1,173 @@
 package main
 
 import (
-	"database/sql"
-	"log"
-	"net/http"
+    "database/sql"
+    "log"
+    "net/http"
 
-	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql" // MySQL driver
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/google"
+    _ "github.com/go-sql-driver/mysql" // MySQL driver
+    "github.com/gin-gonic/gin"
+    "github.com/markbates/goth"
+    "github.com/markbates/goth/gothic"
+    "github.com/markbates/goth/providers/google"
 )
+
+
 
 var db *sql.DB // Global database connection
 
 // Initialize the database connection
 func connectDatabase() {
-	var err error
-	dsn := "root:saqqi_king_0.1@tcp(127.0.0.1:3306)/hackathon" // MySQL connection string
-	db, err = sql.Open("mysql", dsn)
-	if err != nil {
-		log.Fatal("Failed to connect to the database:", err)
-	}
+    var err error
+    dsn := "root:saqqi_king_0.1@tcp(127.0.0.1:3306)/hackathon" // MySQL connection string
+    db, err = sql.Open("mysql", dsn)
+    if err != nil {
+        log.Fatal("Failed to connect to the database:", err)
+    }
 
-	// Verify the connection
-	if err := db.Ping(); err != nil {
-		log.Fatal("Database is unreachable:", err)
-	}
+    // Verify the connection
+    if err := db.Ping(); err != nil {
+        log.Fatal("Database is unreachable:", err)
+    }
 
-	log.Println("Connected to the database successfully!")
+    log.Println("Connected to the database successfully!")
 }
 
 func main() {
-	// Initialize database connection
-	connectDatabase()
+    // Initialize database connection
+    connectDatabase()
 
-	// Set up Google OAuth provider
-	goth.UseProviders(
-		google.New(
-			"clientId",     // ***Replace with the Client ID in the .env*** //
-			"clientsecret", // ***Replace with the Client Secret in the .env***//
-			"http://localhost:8080/auth/google/callback",
-		),
-	)
+    // Set up Google OAuth provider
+    goth.UseProviders(
+        google.New(
+            "clientId", // ***Replace with the Client ID in the .env*** //
+            "clientsecret",// ***Replace with the  Client Secret in the .env***//
+            "http://localhost:8080/auth/google/callback",
+        ),
+    )
 
-	gothic.GetProviderName = func(req *http.Request) (string, error) {
-		provider := req.URL.Query().Get("provider")
-		if provider == "" {
-			provider = "google" // Default to Google
-		}
-		return provider, nil
-	}
+    gothic.GetProviderName = func(req *http.Request) (string, error) {
+        provider := req.URL.Query().Get("provider")
+        if provider == "" {
+            provider = "google" // Default to Google
+        }
+        return provider, nil
+    }
 
-	// Initialize Gin router
-	r := gin.Default()
+    // Initialize Gin router
+    r := gin.Default()
 
-	// Google OAuth routes
-	r.GET("/auth/:provider", func(c *gin.Context) {
-		gothic.BeginAuthHandler(c.Writer, c.Request)
-	})
+    // Google OAuth routes
+    r.GET("/auth/:provider", func(c *gin.Context) {
+        gothic.BeginAuthHandler(c.Writer, c.Request)
+    })
 
-	r.GET("/auth/:provider/callback", func(c *gin.Context) {
-		user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
 
-		// Save user data into MySQL
-		query := "INSERT INTO users (id, email, name, profile_picture) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), profile_picture = VALUES(profile_picture)"
-		_, err = db.Exec(query, user.UserID, user.Email, user.Name, user.AvatarURL)
-		if err != nil {
-			log.Println("Error saving user data:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save user"})
-			return
-		}
+    r.GET("/auth/:provider/callback", func(c *gin.Context) {
+        user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
 
-		c.JSON(http.StatusOK, gin.H{"user": user})
-	})
+        // Save user data into MySQL
+        query := "INSERT INTO users (id, email, name, profile_picture) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), profile_picture = VALUES(profile_picture)"
+        _, err = db.Exec(query, user.UserID, user.Email, user.Name, user.AvatarURL)
+        if err != nil {
+            log.Println("Error saving user data:", err)
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save user"})
+            return
+        }
 
-	// Notes API routes
+        c.JSON(http.StatusOK, gin.H{"user": user})
+    })
 
-	// Create a new note
-	r.POST("/notes", func(c *gin.Context) {
-		var note struct {
-			UserID  string `json:"user_id"`
-			Title   string `json:"title"`
-			Content string `json:"content"`
-		}
-		if err := c.ShouldBindJSON(&note); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+    // Notes API routes
 
-		query := "INSERT INTO notes (id,user_id, title, content) VALUES (UUID(),?, ?, ?)"
-		_, err := db.Exec(query, note.UserID, note.Title, note.Content)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"message": "Note created successfully!"})
-	})
+    // Create a new note
+    r.POST("/notes", func(c *gin.Context) {
+        var note struct {
+            UserID  string `json:"user_id"`
+            Title   string `json:"title"`
+            Content string `json:"content"`
+        }
+        if err := c.ShouldBindJSON(&note); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
 
-	// Retrieve all notes for a user
-	r.GET("/notes/:user_id", func(c *gin.Context) {
-		userID := c.Param("user_id")
+        query := "INSERT INTO notes (id,user_id, title, content) VALUES (UUID(),?, ?, ?)"
+        _, err := db.Exec(query, note.UserID, note.Title, note.Content)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+        c.JSON(http.StatusOK, gin.H{"message": "Note created successfully!"})
+    })
 
-		rows, err := db.Query("SELECT id, title, content, created_at FROM notes WHERE user_id = ?", userID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		defer rows.Close()
+    // Retrieve all notes for a user
+    r.GET("/notes/:user_id", func(c *gin.Context) {
+        userID := c.Param("user_id")
 
-		var notes []map[string]interface{}
-		for rows.Next() {
-			var id, title, content, createdAt string
-			rows.Scan(&id, &title, &content, &createdAt)
-			notes = append(notes, map[string]interface{}{
-				"id":         id,
-				"title":      title,
-				"content":    content,
-				"created_at": createdAt,
-			})
-		}
+        rows, err := db.Query("SELECT id, title, content, created_at FROM notes WHERE user_id = ?", userID)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+        defer rows.Close()
 
-		c.JSON(http.StatusOK, gin.H{"notes": notes})
-	})
+        var notes []map[string]interface{}
+        for rows.Next() {
+            var id, title, content, createdAt string
+            rows.Scan(&id, &title, &content, &createdAt)
+            notes = append(notes, map[string]interface{}{
+                "id":        id,
+                "title":     title,
+                "content":   content,
+                "created_at": createdAt,
+            })
+        }
 
-	// Update a note
-	r.PUT("/notes/:id", func(c *gin.Context) {
-		noteID := c.Param("id")
-		var note struct {
-			Title   string `json:"title"`
-			Content string `json:"content"`
-		}
-		if err := c.ShouldBindJSON(&note); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+        c.JSON(http.StatusOK, gin.H{"notes": notes})
+    })
 
-		query := "UPDATE notes SET title = ?, content = ? WHERE id = ?"
-		_, err := db.Exec(query, note.Title, note.Content, noteID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+    // Update a note
+    r.PUT("/notes/:id", func(c *gin.Context) {
+        noteID := c.Param("id")
+        var note struct {
+            Title   string `json:"title"`
+            Content string `json:"content"`
+        }
+        if err := c.ShouldBindJSON(&note); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
 
-		c.JSON(http.StatusOK, gin.H{"message": "Note updated successfully!"})
-	})
+        query := "UPDATE notes SET title = ?, content = ? WHERE id = ?"
+        _, err := db.Exec(query, note.Title, note.Content, noteID)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
 
-	// Delete a note
-	r.DELETE("/notes/:id", func(c *gin.Context) {
-		noteID := c.Param("id")
+        c.JSON(http.StatusOK, gin.H{"message": "Note updated successfully!"})
+    })
 
-		query := "DELETE FROM notes WHERE id = ?"
-		_, err := db.Exec(query, noteID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+    // Delete a note
+    r.DELETE("/notes/:id", func(c *gin.Context) {
+        noteID := c.Param("id")
 
-		c.JSON(http.StatusOK, gin.H{"message": "Note deleted successfully!"})
-	})
+        query := "DELETE FROM notes WHERE id = ?"
+        _, err := db.Exec(query, noteID)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
 
-	// Start the server
-	log.Println("Server running on http://localhost:8080")
-	r.Run(":8080")
+        c.JSON(http.StatusOK, gin.H{"message": "Note deleted successfully!"})
+    })
+
+    // Start the server
+    log.Println("Server running on http://localhost:8080")
+    r.Run(":8080")
 }
