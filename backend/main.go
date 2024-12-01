@@ -12,6 +12,9 @@ import (
     "github.com/markbates/goth/providers/google"
 )
 
+// client id = "122117947430-dqeqo5h1va6bpcv72rcptpt7f92cufko.apps.googleusercontent.com"
+// client secret = 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
+
 var db *sql.DB // Global database connection
 
 // Initialize the database connection
@@ -38,8 +41,8 @@ func main() {
     // Set up Google OAuth provider
     goth.UseProviders(
         google.New(
-            "122117947430-dqeqo5h1va6bpcv72rcptpt7f92cufko.apps.googleusercontent.com", // Replace with your Client ID
-            "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",                                     // Replace with your Client Secret
+            "clientId", // ***Replace with the above mentioned Client ID *** //
+            "clientsecret",// ***Replace with the above mentioned Client Secret ***//
             "http://localhost:8080/auth/google/callback",
         ),
     )
