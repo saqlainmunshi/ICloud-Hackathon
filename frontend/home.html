@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    
+    <style>
+        nav{
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        nav,h1{
+            display: flex;
+            align-items: center;
+        }
+        .dp {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          overflow: hidden;
+          display: inline-block;
+        }
+
+        .dp img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        }
+        /* Dropdown container */
+.dropdown-menu {
+  display: none; /* Initially hidden */
+  position: absolute; /* Positioned relative to its parent */
+  background-color: #fff; /* White background */
+  border: 1px solid #ccc; /* Light border around the menu */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  min-width: 160px; /* Adjust width of the dropdown */
+  padding: 5px 0; /* Padding around items */
+  z-index: 1000; /* Ensures the dropdown appears on top */
+}
+
+/* Dropdown item styling */
+.dropdown-item {
+  padding: 10px 15px; /* Padding inside each item */
+  color: #333; /* Text color */
+  text-decoration: none; /* Remove underline */
+  display: block; /* Make items block elements */
+  width: 100%; /* Make items fill the container */
+}
+
+/* Hover effect for dropdown items */
+.dropdown-item:hover {
+  background-color: #f1f1f1; /* Light grey background on hover */
+  color: #007bff; /* Change text color to blue on hover */
+  width: 80%;
+}
+
+/* Show dropdown when hovering over the parent element */
+.dropdown:hover .dropdown-menu {
+  display: block; /* Show the dropdown menu */
+}
+
+/* Optional: Position the dropdown relative to the button */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+/* From Uiverse.io by lenfear23 */ 
+button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  cursor: pointer;
+  width: 150px;
+  height: 50px;
+  background-image: linear-gradient(to top, #D8D9DB 0%, #fff 80%, #FDFDFD 100%);
+  border-radius: 30px;
+  border: 1px solid #8F9092;
+  transition: all 0.2s ease;
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #606060;
+  text-shadow: 0 1px #fff;
+}
+.logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  cursor: pointer;
+  width: 150px;
+  height: 50px;
+  background-image: linear-gradient(to top, #de9c84 0%, #da7a7a 80%, #e37575 100%);
+  border-radius: 30px;
+  border: 1px solid #c37057;
+  transition: all 0.2s ease;
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #191818;
+  text-shadow: 0 1px #dd8f8f;
+}
+
+button:hover {
+  box-shadow: 0 4px 3px 1px #FCFCFC, 0 6px 8px #D6D7D9, 0 -4px 4px #CECFD1, 0 -6px 4px #FEFEFE, inset 0 0 3px 3px #CECFD1;
+}
+
+
+main{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+
+
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="dp">
+            <img src="DALL·E 2024-11-30 02.35.21 - A young boy in his late teens, with a cheerful expression, posing for a profile picture. He has neatly styled short hair, wearing a casual outfit like.webp" alt="Profile Picture">
+        </div>
+        <h1>Hello, [User Name]!</h1>
+    </nav>
+    <main>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Notes
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a class="dropdown-item" href="#">Create Note</a>
+              <a class="dropdown-item" href="#">Edit Note </a>
+              <a class="dropdown-item" href="#">Delete Note</a>
+            </div>
+          </div>
+
+<div><button>File Upload</button></div>
+<div><button class="logout">Logout</button></div>
+    </main>
+</body>
+</html>

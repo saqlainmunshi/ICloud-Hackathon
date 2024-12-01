@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; font-src 'self' data:;">
+
+    <title>Document</title>
+    <style>
+        *{
+padding: 0;
+margin: 0;
+box-sizing: border-box;
+}
+body{
+    height: 100vh;
+    width: 100%;
+    background: linear-gradient(45deg,#d2001a,#7462ff,#f48e21,#23d5ab);
+    background-size: 300% 300%;
+    animation: color 12s ease-in-out infinite ;
+}
+@keyframes color{
+    0%{
+        background-position: 0 50%;
+    }
+    
+    50%{
+        background-position: 100% 50%;
+    }
+    
+    100%{
+        background-position: 0 50%;
+    }
+    
+}.btn-donate {
+  --clr-font-main: hsla(0 0% 20% / 100);
+  --btn-bg-1: hsla(194 100% 69% / 1);
+  --btn-bg-2: hsla(217 100% 56% / 1);
+  --btn-bg-color: hsla(360 100% 100% / 1);
+  --radii: 0.5em;
+  cursor: pointer;
+  padding: 0.9em 1.4em;
+  min-width: 120px;
+  min-height: 44px;
+  font-size: var(--size, 1rem);
+  font-weight: 500;
+  transition: 0.8s;
+  background-size: 280% auto;
+  background-image: linear-gradient(
+    325deg,
+    var(--btn-bg-2) 0%,
+    var(--btn-bg-1) 55%,
+    var(--btn-bg-2) 90%
+  );
+  border: none;
+  border-radius: var(--radii);
+  color: var(--btn-bg-color);
+  box-shadow:
+    0px 0px 20px rgba(71, 184, 255, 0.5),
+    0px 5px 5px -1px rgba(58, 125, 233, 0.25),
+    inset 4px 4px 8px rgba(175, 230, 255, 0.5),
+    inset -4px -4px 8px rgba(19, 95, 216, 0.35);
+    height: 100px;
+    width: 200px;
+    
+}
+
+.btn-donate:hover {
+  background-position: right top;
+}
+
+.btn-donate:is(:focus, :focus-visible, :active) {
+  outline: none;
+  box-shadow:
+    0 0 0 3px var(--btn-bg-color),
+    0 0 0 6px var(--btn-bg-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-donate {
+    transition: linear;
+  }
+}
+body{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+footer{
+    position: absolute;
+    bottom: 10px;
+   
+}
+div{
+    display: grid;
+    gap: 10px;
+    
+}
+div,h1{
+    position: relative;
+    left: -25px;
+}
+    </style>
+</head>
+<body>
+    <div><button class="btn-donate" onclick="window.location.href='/auth/google'">Sign in with Google</button>
+
+<section>
+<h1>"Your Personal Cloud, Simplified."</h1>
+    <h1>"Access your files and notes anywhere, anytime."</h1></section></div>
+   <div> <footer><h2>© 2024 MY-Cloud</h2></footer></div>
+</body>
+</html>
